@@ -13,7 +13,7 @@ public class F102 {
     public String F101(){
         String result = "空";
         try{
-            VHelper vh = new VHelper("T/F101/index.html");
+            VHelper vh = new VHelper("T/F102/index.html");
             result = vh.render();
         }catch (Exception e){
             log.error("/F101 出现错误,错误信息:{},现在时间:{}",e.getMessage(), DateUtil.now());

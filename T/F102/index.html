@@ -1,10 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.3/lib/theme-chalk/index.css">
+    <title>登录</title>
 </head>
-<body>
 
+<body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.3/lib/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@1.3.4/dist/axios.min.js"></script>
+<div id="app">
+    <el-card class="box-card" style="width: 1200px;height: 300px;border-radius: 30px;left: 17%;position:absolute;top:50%;
+            transform:translateY(-50%);">
+        <div slot="header" class="clearfix">
+            <span>卡片名称</span>
+        </div>
+        <div>
+            <span>
+                Hello World
+            </span>
+        </div>
+        <div style="float: right;width: 600px;margin: 0 auto">
+            <el-form :model="userForm" :rules="rules" label-width="100px">
+                <el-form-item label="用户编号" prop="userId">
+                    <el-input v-model="userForm.userId"></el-input>
+                </el-form-item>
+                <el-form-item label="用户密码" prop="userPassword">
+                    <el-input v-model="userForm.userPassword" type="password"></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+    </el-card>
+
+</div>
+    <script>
+        const vm = new Vue({
+            el: '#app',
+            data: {
+                userForm:{
+                    userId:"",
+                    userPassword:""
+                },
+                rules: {
+                    userId: [
+                        {required: true, message: '请输入用户编号', trigger: 'blur'},
+                    ],
+                    userPassword: [
+                        {required: true, message: '请输入用户密码', trigger: 'blur'}
+                    ]
+                }
+            },
+            methods: {
+                MtshowOK(msg) {
+                    this.$message({
+                        message: msg,
+                        type: 'success',
+                        duration: 1000,
+                    });
+                },
+                MtshowError(msg) {
+                    this.$message({
+                        message: msg,
+                        type: 'error',
+                        duration: 1000,
+                    });
+                }
+            }
+        })
+    </script>
 </body>
 </html>
