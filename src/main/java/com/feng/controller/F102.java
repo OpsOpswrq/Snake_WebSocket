@@ -18,7 +18,7 @@ import java.util.Map;
 @Slf4j
 public class F102 {
     private static Map<String,String> userIds = new HashMap<>();
-    @GetMapping("/F101")
+    @GetMapping("/main")
     public String F101(){
         String result = "空";
         try{
