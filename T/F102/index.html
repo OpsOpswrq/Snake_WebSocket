@@ -12,16 +12,18 @@
 <body>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.min.js" type="text/javascript" charset="utf-8"></script>
 <script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.3/lib/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios@1.3.4/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <div id="app">
     <el-card class="box-card" style="width: 1200px;height: 300px;border-radius: 30px;left: 17%;position:absolute;top:50%;
             transform:translateY(-50%);">
         <div slot="header" class="clearfix">
-            <span>卡片名称</span>
+            <span>贪 吃 蛇</span>
         </div>
-        <div>
+        <div style="position: relative;float: left">
+            <h3>游戏玩法</h3>
             <span>
-                Hello World
+                用游戏把子上下左右控制蛇的方向，寻找吃的东西，每吃一口就能<br/>得到一定的积分，
+                而且蛇的身子会越吃越长，身子越长玩的难度就越大，<br/>不能碰墙，不能咬到自己的身体，更不能咬自己的尾巴
             </span>
         </div>
         <div style="float: right;width: 600px;margin: 0 auto">
@@ -29,9 +31,7 @@
                 <el-form-item label="用户编号" prop="userId">
                     <el-input v-model="userForm.userId"></el-input>
                 </el-form-item>
-                <el-form-item label="用户密码" prop="userPassword">
-                    <el-input v-model="userForm.userPassword" type="password"></el-input>
-                </el-form-item>
+                <el-button icon="el-icon-s-promotion" @click="login" style="margin-left: 20%">登录</el-button>
             </el-form>
         </div>
     </el-card>
@@ -43,18 +43,28 @@
             data: {
                 userForm:{
                     userId:"",
-                    userPassword:""
                 },
                 rules: {
                     userId: [
                         {required: true, message: '请输入用户编号', trigger: 'blur'},
-                    ],
-                    userPassword: [
-                        {required: true, message: '请输入用户密码', trigger: 'blur'}
                     ]
                 }
             },
             methods: {
+                login(){
+                    $.post({
+                        url:"/F102/ajax1",
+                        type:"post",
+                        data:JSON.stringify(this.userForm),
+                        dataType:"json",
+                        contentType:"application/json; charset=utf-8",
+                    },r=>{
+                        this.MtshowOK("登录成功")
+                        setTimeout(()=>{
+                            window.location.href = "/F101";
+                        },1500)
+                    })
+                },
                 MtshowOK(msg) {
                     this.$message({
                         message: msg,
