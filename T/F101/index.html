@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>贪吃蛇</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.3/lib/theme-chalk/index.css">
   <style>
     * {
       margin: 0;
@@ -32,11 +33,28 @@
 </head>
 
 <body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.3/lib/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<div id="app" style="float:left;position:absolute;left: 5%">
+  <ul>
+    <li v-for="(item,index) in userIds" :key="index" v-if="item !== userId">
+      <span>{{item}}</span>  &nbsp;&nbsp;&nbsp;&nbsp;
+      <el-button icon="el-icon-s-promotion" @click="()=>{sendMessage(item)}">
+        发起挑战
+      </el-button>
+    </li>
+  </ul>
+</div>
 <h2 class="title">贪吃蛇小游戏</h2>
 <button id="btn" class="btn" type="button">开始游戏</button>
 <div id="map" class="map"></div>
-
+<div>
+  <span>现在长度是：</span><span id="score"></span>
+</div>
 <script>
+  var websocket = null;
+  let userIds = [];
   var map = document.getElementById("map");
 
   // 存放food的数组，用来删除food
@@ -167,6 +185,7 @@
 
           // 将snake的每个节点添加到数组中，以便后期删除使用
           snakeElements.push(div);
+          document.getElementById("score").innerHTML = snakeElements.length
         }
       };
     }
@@ -234,6 +253,13 @@
           // 清除定时器
           clearInterval(timeId);
           timeId = null; 	// 通过timeId = null保证以后每次能正常启动定时器
+          if(vm.fromUserId === ""){
+            let message = {"toUserId":vm.toUserId,"fromUserId":"100"}
+            websocket.send(JSON.stringify(message))
+          }else{
+            let message = {"toUserId":vm.fromUserId,"fromUserId":"100"}
+            websocket.send(JSON.stringify(message))
+          }
           alert("对不起，您撞墙了，游戏结束！");
           // 移除snake
           this.remove();
@@ -269,6 +295,13 @@
             // 清除定时器
             clearInterval(timeId);
             timeId = null;
+            if(vm.fromUserId === ""){
+              let message = {"toUserId":vm.toUserId,"fromUserId":"100"}
+              websocket.send(JSON.stringify(message))
+            }else{
+              let message = {"toUserId":vm.fromUserId,"fromUserId":"100"}
+              websocket.send(JSON.stringify(message))
+            }
             alert("对不起，您把自己吃了，游戏结束！");
             // 移除snake
             this.remove();
@@ -353,6 +386,93 @@
     timeId = setInterval("snake.move()", 200);
   };
   btn.onclick = begin;
+  if("WebSocket" in window){
+    //连接WebSocket节点
+    let url = window.location.href;
+    let userId = url.slice(url.lastIndexOf("/")+1)
+    websocket = new WebSocket("ws://localhost:8080/game/"+userId);
+  }
+  websocket.onerror = ()=>{
+
+  }
+  websocket.onmessage = (event)=>{
+    try{
+      let obj = JSON.parse(event.data);
+      if(typeof obj == "object" && obj){
+        let json = JSON.parse(event.data)
+        vm.userIds = json.userIds
+      }else{
+        if(event.data === "100"){
+          alert("你的对手已经结束游戏了"+"你的得分是:"+snakeElements.length)
+          if(confirm("是否继续游玩!")){
+
+          }else {
+            history.go(0)
+          }
+        } else{
+          alert("玩家"+event.data+"想要与你对战,现在就要开始了!")
+          vm.fromUserId = event.data
+          console.log(vm.fromUserId)
+          timeId = setInterval("snake.move()", 200);
+        }
+      }
+    }catch (e){
+    }
+  }
+  websocket.onclose = (userId)=>{
+  }
+  window.onbeforeunload = ()=>{
+    let url = window.location.href;
+    let userId = url.slice(url.lastIndexOf("/")+1)
+    websocket.close(userId);
+  }
+  const vm = new Vue({
+    el: '#app',
+    mounted(){
+      $.get("/ajax2",{},(r)=>{
+        userIds = r.data
+      })
+      $.post("/ajax3",{},r=>{
+
+      })
+      let url = window.location.href;
+      let userId = url.slice(url.lastIndexOf("/")+1)
+      this.userId = userId
+    },
+    data(){
+      return {
+        userIds:[],
+        userId:"",
+        fromUserId:"",
+        toUserId:"",
+      }
+    },
+    methods:{
+      sendMessage(userId){
+        let url = window.location.href;
+        let fromUserId = url.slice(url.lastIndexOf("/")+1)
+        let message = {"fromUserId":fromUserId,"toUserId":userId}
+        websocket.send(JSON.stringify(message))
+        this.toUserId = userId;
+        this.snakeLength = snakeElements.length
+        timeId = setInterval("snake.move()", 200);
+      }
+    },
+    MtshowOK(msg) {
+      this.$message({
+        message: msg,
+        type: 'success',
+        duration: 1000,
+      });
+    },
+    MtshowError(msg) {
+      this.$message({
+        message: msg,
+        type: 'error',
+        duration: 1000,
+      });
+    }
+  })
 </script>
 </body>
 
