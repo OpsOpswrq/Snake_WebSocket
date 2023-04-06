@@ -37,21 +37,41 @@
 <script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.3/lib/index.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <div id="app" style="float:left;position:absolute;left: 5%">
-  <ul>
-    <li v-for="(item,index) in userIds" :key="index" v-if="item !== userId">
+  <el-card class="box-card">
+    <div slot="header" class="clearfix">
+      <span>在线人数</span>
+    </div>
+    <div v-for="(item,index) in userIds" :key="index" v-if="item !== userId" style="width: 300px">
       <span>{{item}}</span>  &nbsp;&nbsp;&nbsp;&nbsp;
-      <el-button icon="el-icon-s-promotion" @click="()=>{sendMessage(item)}">
+      <el-button icon="el-icon-s-promotion" @click="()=>{sendMessage(item)}" style="float: right;" size="mini">
         发起挑战
       </el-button>
-    </li>
-  </ul>
+      <br/>
+      <br/>
+    </div>
+  </el-card>
+  <br/>
+  <br/>
+  <div>
+    <el-card class="box-card">
+      <div slot="header" class="clearfix">
+        <span>你的得分</span>
+      </div>
+      <div>
+        <span>你的长度是：</span><span id="score"></span>
+      </div>
+      <div>
+        <span>对手长度：</span><input type="text" style="border:0px" v-model:value="opponent">
+      </div>
+    </el-card>
+  </div>
 </div>
 <h2 class="title">贪吃蛇小游戏</h2>
-<button id="btn" class="btn" type="button">开始游戏</button>
+<br/>
+<el-button icon="el-icon-s-promotion" id="btn"  style="left: 48%;position: relative;">开始游戏</el-button>
+<br/>
+<br/>
 <div id="map" class="map"></div>
-<div>
-  <span>现在长度是：</span><span id="score"></span>
-</div>
 <script>
   var websocket = null;
   let userIds = [];
@@ -240,6 +260,13 @@
             y: last.y,
             color: last.color
           });
+          if(vm.fromUserId === ""){
+            let message = {"toUserId":vm.toUserId,"fromUserId":snakeElements.length}
+            websocket.send(JSON.stringify(message))
+          }else{
+            let message = {"toUserId":vm.fromUserId,"fromUserId":snakeElements.length}
+            websocket.send(JSON.stringify(message))
+          }
           // 删除吃掉的食物，生成新的食物
           food.init();
         }
@@ -402,14 +429,19 @@
         let json = JSON.parse(event.data)
         vm.userIds = json.userIds
       }else{
-        if(event.data === "100"){
+        let data = parseInt(event.data);
+        console.log(data)
+        if(data === 100){
           alert("你的对手已经结束游戏了"+"你的得分是:"+snakeElements.length)
           if(confirm("是否继续游玩!")){
 
           }else {
             history.go(0)
           }
-        } else{
+        } else if(data < 100) {
+          vm.opponent = data
+
+        }else{
           alert("玩家"+event.data+"想要与你对战,现在就要开始了!")
           vm.fromUserId = event.data
           console.log(vm.fromUserId)
@@ -445,6 +477,7 @@
         userId:"",
         fromUserId:"",
         toUserId:"",
+        opponent:0,
       }
     },
     methods:{
